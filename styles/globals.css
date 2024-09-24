@@ -1,0 +1,95 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 120 20% 98%;
+    --foreground: 120 30% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 120 30% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 120 30% 10%;
+    --primary: 142 76% 36%;
+    --primary-foreground: 120 20% 98%;
+    --secondary: 120 20% 92%;
+    --secondary-foreground: 120 30% 10%;
+    --muted: 120 20% 92%;
+    --muted-foreground: 120 15% 40%;
+    --accent: 142 76% 36%;
+    --accent-foreground: 120 20% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 120 20% 98%;
+    --border: 120 20% 88%;
+    --input: 120 20% 88%;
+    --ring: 142 76% 36%;
+    --radius: 0.5rem;
+    --chart-1: 142 76% 36%;
+    --chart-2: 160 84% 39%;
+    --chart-3: 180 77% 31%;
+    --chart-4: 95 69% 42%;
+    --chart-5: 45 93% 47%;
+  }
+
+  .dark {
+    --background: 120 30% 10%;
+    --foreground: 120 20% 98%;
+    --card: 120 30% 10%;
+    --card-foreground: 120 20% 98%;
+    --popover: 120 30% 10%;
+    --popover-foreground: 120 20% 98%;
+    --primary: 142 76% 36%;
+    --primary-foreground: 120 20% 98%;
+    --secondary: 120 20% 20%;
+    --secondary-foreground: 120 20% 98%;
+    --muted: 120 20% 20%;
+    --muted-foreground: 120 15% 70%;
+    --accent: 142 76% 36%;
+    --accent-foreground: 120 20% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 120 20% 98%;
+    --border: 120 20% 20%;
+    --input: 120 20% 20%;
+    --ring: 142 76% 36%;
+    --chart-1: 142 76% 46%;
+    --chart-2: 160 84% 49%;
+    --chart-3: 180 77% 41%;
+    --chart-4: 95 69% 52%;
+    --chart-5: 45 93% 57%;
+  }
+}
+
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  .markdown_style > * {
+    all: revert;
+  }
+
+  .markdown_style a {
+    color: rgb(59 130 246);
+    font-weight: 500;
+  }
+
+  .markdown_style a:hover {
+    text-decoration: underline;
+  }
+
+  .markdown_style h1 {
+    font-size: 20px;
+  }
+
+  .markdown_style h2 {
+    font-size: 18px;
+  }
+
+  .markdown_style h3 {
+    font-size: 16px;
+  }
+}
