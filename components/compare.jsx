@@ -7,11 +7,12 @@ import { Progress } from "@/components/ui/progress"
 export default function Compare({
   analysis,
   location,
-  setLocation
+  setLocation,
+  comparison, 
+  setComparison
 }) {
   const [isEditingLocation, setIsEditingLocation] = useState(false)
   const [editedLocation, setEditedLocation] = useState("")
-  const [comparison, setComparison] = useState(null)
 
   const [isConfirmingLocation, setIsConfirmingLocation] = useState(false)
   const [isSavingLocation, setIsSavingLocation] = useState(false)
@@ -32,6 +33,23 @@ export default function Compare({
       })
       setIsConfirmingLocation(false)
     }, 1500)
+  }
+
+  const analyseComparision = async () => {
+    setIsConfirmingLocation(true)
+    const response = await fetch("/api/compare", {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        address: location
+      }),
+    });
+
+    const data = await response.json();
+
+    setIsConfirmingLocation(false)
   }
 
   const handleEditLocation = () => {
@@ -86,7 +104,7 @@ export default function Compare({
             </div>
           )}
           <div className="flex gap-2">
-            <Button onClick={handleLocationConfirm} disabled={isConfirmingLocation}>
+            <Button onClick={analyseComparision} disabled={isConfirmingLocation}>
               {isConfirmingLocation ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
