@@ -6,9 +6,6 @@ import { useChat } from 'ai/react';
 import Markdown from 'markdown-to-jsx'
 
 export default function Chat({ utilityFile }) {
-  const [message, setMessage] = useState("")
-  const [chat, setChat] = useState([])
-
   const handleOnError = () => {
     setIsSendingMessage(false)
   }
@@ -20,7 +17,6 @@ export default function Chat({ utilityFile }) {
   const { messages, input, handleInputChange, handleSubmit } = useChat({
     api: "/api/chat",
     onError: handleOnError,
-    // onResponse: handleOnResponse,
     onFinish: handleOnFinish
   });
 

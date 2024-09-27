@@ -15,62 +15,91 @@ export default async function handler(req, res) {
     return;
   }
 
-  const { address } = req.body;
+  const { address, imageURL } = req.body;
 
   try {
     const geocodeURL = `https://geocode.maps.co/search?q=${address}&api_key=${process.env.GEOCODE_API_KEY}`;
-    const response = await fetch(geocodeURL, {
+    const geocodeResponse = await fetch(geocodeURL, {
       method: 'GET',
     });
 
-    const data = await response.json();
+    const geocodeData = await geocodeResponse.json();
 
-    if (!data.length) {
-      
+    if (!geocodeData.length) {
+      return res.status(404).json({
+        status: false,
+        error: "The location address is incorrect. Use a correct address.",
+      });
     }
 
-    console.log({ data })
+    const { lat, lon } = geocodeData[0]
 
-    // const systemPrompt = `You are an utility bill analyser`;
+    const electricityMapURL = `https://api.electricitymap.org/v3/power-breakdown/latest?${lat}=lat&lon=${lon}`;
+    const electricityMapResponse = await fetch(electricityMapURL, {
+      method: 'GET',
+      headers: {
+        'auth-token': process.env.ELECTRICITY_MAP_API_KEY
+      }
+    });
 
-    // const prompt = {
-    //   "type": "text",
-    //   "text": "Provide a comprehensive analysis for this electric bill."
-    // };
+    const electricityMapData = await electricityMapResponse.json();
 
-    // const messages = [
-    //   { 
-    //     "role": "system", 
-    //     "content": systemPrompt 
-    //   },
-    //   {
-    //     "role": "user",
-    //     "content": [
-    //       {
-    //         "type": "image_url",
-    //         "image_url": {
-    //           "url": imageURL
-    //         }
-    //       },
-    //       {...prompt}
-    //     ]
-    //   }
-    // ];
+    if(electricityMapData.error) {
+      return res.status(404).json({
+        status: false,
+        error: "Electricity data is not available for this location. Try again with a new location.",
+      });
+    }
+    
+    const electricityMapDataString = JSON.stringify(electricityMapData.powerConsumptionBreakdown)
 
+    const systemPrompt = `You are an utility bill analyser who compare my electricity usage with that of the people in my neighborhood`;
 
-    // const response = await openai.chat.completions.create({
-    //   model: "gpt-4o",
-    //   messages,
-    //   temperature: 1,
-    //   stream: false
-    // });
+    const prompt = `
+    Your task is to analyse my electricity bill and compare it with my neighorhood's usage. 
+    This is my neighorhood Power Consumption Breakdown(the unit of the data is in gCO2eq/kWh): ${electricityMapDataString}
+    Summarize my neighorhood Power Consumption and more it to mine.
+    Go straight to the point and include my energy contribution and implication on the neighborhood.
+    Do not return the data just analyse the data and bring out your conclusion.
+    `;
 
-    // const generatedResponse = response.choices.pop();
-    // const content = generatedResponse.message.content;
+    const messages = [
+      { 
+        "role": "system", 
+        "content": systemPrompt 
+      },
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": imageURL
+            }
+          },
+          {
+            "type": "text",
+            "text": prompt
+          }
+        ]
+      }
+    ];
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages,
+      temperature: 1,
+      stream: false
+    });
+
+    const generatedResponse = response.choices.pop();
+    const content = generatedResponse.message.content;
+
+    console.log(content)
 
     return res.status(200).json({
       status: true,
-      data: "content",
+      data: content,
     });
   } catch (error) {
     console.log({ error });

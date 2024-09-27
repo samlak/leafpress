@@ -2,38 +2,22 @@ import { useState } from 'react'
 import { Edit2, Loader2 } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Progress } from "@/components/ui/progress"
+import { toast } from "@/components/ui/use-toast";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export default function Compare({
-  analysis,
   location,
   setLocation,
   comparison, 
-  setComparison
+  setComparison,
+  utilityFile
 }) {
   const [isEditingLocation, setIsEditingLocation] = useState(false)
   const [editedLocation, setEditedLocation] = useState("")
 
   const [isConfirmingLocation, setIsConfirmingLocation] = useState(false)
   const [isSavingLocation, setIsSavingLocation] = useState(false)
-
-  const handleLocationConfirm = () => {
-    setIsConfirmingLocation(true)
-    // Simulate comparison (replace with actual comparison logic)
-    setTimeout(() => {
-      setComparison({
-        averageUsage: 550,
-        averageCost: 165,
-        percentileLower: 60,
-        topSavers: [
-          "Using smart thermostats",
-          "Installing solar panels",
-          "Upgrading to energy-efficient appliances"
-        ]
-      })
-      setIsConfirmingLocation(false)
-    }, 1500)
-  }
 
   const analyseComparision = async () => {
     setIsConfirmingLocation(true)
@@ -43,13 +27,24 @@ export default function Compare({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        address: location
+        address: location, 
+        imageURL: utilityFile
       }),
     });
 
     const data = await response.json();
 
     setIsConfirmingLocation(false)
+    if(!data.status) {
+      toast({
+        variant: "destructive",
+        description: data.error,
+      });
+    }
+
+    setComparison(data.data)
+
+    localStorage.setItem('comparisonData', data.data);
   }
 
   const handleEditLocation = () => {
@@ -59,11 +54,11 @@ export default function Compare({
 
   const handleSaveLocation = () => {
     setIsSavingLocation(true)
-    // Simulate saving location (replace with actual save logic)
+    
     setTimeout(() => {
       setLocation(editedLocation)
       setIsEditingLocation(false)
-      setComparison(null) // Reset comparison when location changes
+      setComparison(null)
       setIsSavingLocation(false)
     }, 1000)
   }
@@ -108,55 +103,22 @@ export default function Compare({
               {isConfirmingLocation ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Confirming...
+                  Comparing...
                 </>
               ) : (
-                'Confirm'
+                'Compare'
               )}
             </Button>
           </div>
         </div>
       ) : (
         <div>
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div>
-              <p className="text-sm text-gray-600">Your Usage</p>
-              <p className="text-2xl font-bold text-green-600">{analysis.usage} kWh</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Neighborhood Average</p>
-              <p className="text-2xl font-bold text-blue-600">{comparison.averageUsage} kWh</p>
-            </div>
-          </div>
-          <div className="mb-6">
-            <h4 className="text-lg font-semibold mb-2 text-green-700">Usage Percentile</h4>
-            <p className="text-gray-600 mb-2">Your energy usage is lower than {comparison.percentileLower}% of your neighbors.</p>
-            <Progress value={comparison.percentileLower} className="h-2" />
-          </div>
-          <div className="mb-6">
-            <h4 className="text-lg font-semibold mb-2 text-green-700">Cost Comparison</h4>
-            <p className="text-gray-600">
-              Your energy cost (${analysis.cost}) is {' '}
-              {analysis.cost < comparison.averageCost ? (
-                <span className="text-green-600 font-semibold">
-                  ${(comparison.averageCost - analysis.cost).toFixed(2)} less than
-                </span>
-              ) : (
-                <span className="text-red-600 font-semibold">
-                  ${(analysis.cost - comparison.averageCost).toFixed(2)} more than
-                </span>
-              )}
-              {' '}the neighborhood average (${comparison.averageCost}).
-            </p>
-          </div>
-          <div>
-            <h4 className="text-lg font-semibold mb-2 text-green-700">Top Energy-Saving Methods in Your Area</h4>
-            <ul className="list-disc list-inside space-y-2">
-              {comparison.topSavers.map((method, index) => (
-                <li key={index} className="text-gray-600">{method}</li>
-              ))}
-            </ul>
-          </div>
+          <ReactMarkdown
+            className="markdown markdown_style leading-tight"
+            remarkPlugins={[remarkGfm]}
+          >
+            {comparison}
+          </ReactMarkdown>
         </div>
       )}
     </div>

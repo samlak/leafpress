@@ -20,11 +20,13 @@ export default function LeafpressEnergyInsight() {
     const utilityFileUrl = localStorage.getItem('utilityFileUrl');
     const userLocation = localStorage.getItem('userLocation');
     const billAnalysis = localStorage.getItem('billAnalysis');
+    const comparisonData = localStorage.getItem('comparisonData');
 
     if (utilityFileUrl && billAnalysis) {
       setUtilityFile(utilityFileUrl);
-      setAnalysis(JSON.parse(billAnalysis));
+      setAnalysis(billAnalysis);
       setLocation(userLocation);
+      setComparison(comparisonData)
       setIsAnalyzed(true);
     }
   }, [])
@@ -69,7 +71,6 @@ export default function LeafpressEnergyInsight() {
               setActiveTab={setActiveTab}
               setAnalysis={setAnalysis}
               setLocation={setLocation}
-              utilityFile={utilityFile}
               setUtilityFile={setUtilityFile}
             />
           ) : (
@@ -91,11 +92,11 @@ export default function LeafpressEnergyInsight() {
               <TabsContent value="compare" className="mt-4">
                 {location && (
                   <Compare 
-                    analysis={analysis}
                     location={location}
                     setLocation={setLocation}
                     comparison={comparison}
                     setComparison={setComparison}
+                    utilityFile={utilityFile}
                   />
                 )}
               </TabsContent>

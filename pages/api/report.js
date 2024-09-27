@@ -20,10 +20,21 @@ export default async function handler(req, res) {
   try {
     const systemPrompt = `You are an utility bill analyser`;
 
-    const prompt = {
-      "type": "text",
-      "text": "Provide a comprehensive analysis for this electric bill."
-    };
+    const prompt = `
+      Provide a comprehensive analysis for this electric bill and extract the house address of the bill owner.
+      The analysis should only include the most important aspect of the my energy usage.
+      Talk more on my energy usage.
+
+      Do not include the report title like "Energy Bill Analysis", just start from the account summary.
+
+      If the house address is not found return "NO ADDRESS".
+      Your resault must be in JSON format like this:
+      {
+        "analysis": "the analysis should be in markdown format"
+        "address": "house address on the bill"
+      }
+
+    `;
 
     const messages = [
       { 
@@ -39,27 +50,29 @@ export default async function handler(req, res) {
               "url": imageURL
             }
           },
-          {...prompt}
+          {
+            "type": "text",
+            "text": prompt
+          }
         ]
       }
     ];
-
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages,
       temperature: 1,
-      stream: false
+      stream: false,
+      response_format: { type: "json_object" }
     });
 
     const generatedResponse = response.choices.pop();
     const content = generatedResponse.message.content;
-
-    console.log(content)
+    const contentParsed = JSON.parse(content);
 
     return res.status(200).json({
       status: true,
-      data: content,
+      data: contentParsed,
     });
   } catch (error) {
     console.log({ error });

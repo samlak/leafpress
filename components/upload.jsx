@@ -8,7 +8,6 @@ export default function Upload({
   setActiveTab,
   setAnalysis,
   setLocation,
-  utilityFile,
   setUtilityFile
 }) {
   const [file, setFile] = useState(null)
@@ -37,6 +36,8 @@ export default function Upload({
 
       setIsAnalyzing(false);
 
+      console.log(data)
+
       if(!data.status) {
         toast({
           variant: "destructive",
@@ -45,25 +46,8 @@ export default function Upload({
         return ;
       }
 
-      const analysis = {
-        usage: 500,
-        cost: 150,
-        previousUsage: 420,
-        previousCost: 126,
-        breakdown: {
-          lighting: 30,
-          heating: 40,
-          appliances: 20,
-          other: 10
-        },
-        recommendations: [
-          "Switch to LED bulbs to save up to 15% on lighting costs",
-          "Improve insulation to reduce heating expenses by up to 20%",
-          "Use smart power strips to eliminate standby power consumption"
-        ]
-      }
-
-      const location = "123 Green St, Ivanhoe VIC 3079, Australia"
+      const analysis = data.data.analysis;
+      const location = data.data.address;
 
       setAnalysis(analysis)
       setLocation(location)
@@ -72,7 +56,7 @@ export default function Upload({
 
 
       localStorage.setItem('userLocation', location);
-      localStorage.setItem('billAnalysis', JSON.stringify(analysis));
+      localStorage.setItem('billAnalysis', analysis);
 
     } catch (error) {
       setIsAnalyzing(false);
@@ -80,32 +64,6 @@ export default function Upload({
         variant: "destructive",
         description: "Error analysising utility bill. Please try again.",
       });
-    }
-
-    if (file) {
-      setTimeout(() => {
-        setAnalysis({
-          usage: 500,
-          cost: 150,
-          previousUsage: 420,
-          previousCost: 126,
-          breakdown: {
-            lighting: 30,
-            heating: 40,
-            appliances: 20,
-            other: 10
-          },
-          recommendations: [
-            "Switch to LED bulbs to save up to 15% on lighting costs",
-            "Improve insulation to reduce heating expenses by up to 20%",
-            "Use smart power strips to eliminate standby power consumption"
-          ]
-        })
-        setLocation("123 Green Street, Eco City")
-        setIsAnalyzed(true)
-        setActiveTab("report")
-        setIsAnalyzing(false)
-      }, 2000)
     }
   }
 
